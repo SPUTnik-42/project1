@@ -2,3 +2,6 @@ Flask
 Flask-Session
 psycopg2-binary
 SQLAlchemy
+Flask-Bootstrap
+Werkzeug==0.16.0
+Flask-WTF
