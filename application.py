@@ -69,7 +69,8 @@ def signup():
         db.execute("INSERT INTO users (email, username, password) VALUES(:email, :username, :password)", 
                     {"email":email,"username":username, "password":password}
                 )
-    db.commit()
+        db.commit()
+        return redirect(url_for("login"))
     
     return render_template('signup.html', form=form)
 
