@@ -48,10 +48,10 @@ def login():
     if form.validate_on_submit():
         #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
         username = form.username.data
-        user = db.execute("SELECT username, password FROM users WHERE username = :username", {"username":username}).fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = :username", {"username":username}).fetchone()
         if user is not None:
-            if user.password == form.password.data :
-                redirect(url_for('dashboard'))
+            if user[3] == form.password.data :
+                return redirect(url_for('dashboard'))
         
         return '<h1>INVALID USERNAME OR PASSWORD</h1>'
     return render_template('login.html', form=form)
