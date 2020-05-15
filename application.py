@@ -48,9 +48,10 @@ def login():
     if form.validate_on_submit():
         #return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
         username = form.username.data
-        user = db.execute("SELECT username, password FROM users WHERE username = :username", {"username":username}).fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = :username", {"username":username}).fetchall()
+        
         if user is not None:
-            if user.password == form.password.data :
+            if user[1] == form.password.data :
                 redirect(url_for('dashboard'))
         
         return '<h1>INVALID USERNAME OR PASSWORD</h1>'
@@ -77,6 +78,11 @@ def signup():
 @app.route("/dashboard")
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route("/foo")
+def foo():
+    data = db.execute("SELECT * FROM users")
+    
 
 
 
