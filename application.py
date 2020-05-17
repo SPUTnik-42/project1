@@ -1,4 +1,4 @@
-import os
+import os, requests
 from flask import Flask, session, render_template, redirect, url_for, flash, request
 from flask_session import Session
 from flask_bootstrap import Bootstrap
@@ -11,6 +11,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+#database_url
+DATABASE_URL = "postgres://mpbwycyylmpxxx:ac28ae434f8eb7b635529c2f3dd41042b1bbdcec8c820334f56271e97024eb47@ec2-52-71-55-81.compute-1.amazonaws.com:5432/d1n2s5r3apv588"
+
+#api_key 
+GOODREADS_API_KEY = "ya8uM2HkMVhG6V4t7bXjA"
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -153,6 +159,22 @@ def search():
 
     return render_template("results.html", books=books)
 
+@app.route("/book/<isbn>")
+@login_required
+def book(isbn):
+    #key: ya8uM2HkMVhG6V4t7bXjA
+    row = Dbase.execute("SELECT isbn, title, author, year FROM books WHERE \
+                isbn = :isbn",
+                {"isbn": isbn})
+
+    bookInfo = row.fetchall()
+
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_API_KEY, "isbns": isbn})
+    avg_rating_Goodreads = res.json()['books'][0]['average_rating']
+    number_rating_Goodreads = res.json()['books'][0]['work_ratings_count']
+    
+    
+    return render_template("book.html", name=current_user.username,bookInfo = bookInfo, avg_rating_Goodreads = avg_rating_Goodreads,number_rating_Goodreads = number_rating_Goodreads)
 
 if __name__=="__main__":
     app.run(debug=True)

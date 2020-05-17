@@ -1,16 +1,16 @@
 {% extends "bootstrap/base.html" %}
 
 {% block title %}
-    Results
+book 
 {% endblock %}
 
 {% block styles %}
 {{super()}}
-<link rel="stylesheet" href="{{url_for('.static', filename='results.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='book.css')}}">
 {% endblock %}
 
 {% block content %}
-{% include "/_error.html" %}
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
         <div class="navbar-header">
@@ -34,38 +34,20 @@
         </div>
         </div>
     </nav>
-    <div id="text">
-        <h3>Search Results : </h3>
+    <div id="details">
+        {% for info in bookInfo %}
+            <h1>{{info['title']}}</h1>
+            <h2>{{info['author']}}, {{info['year']}} </h2>
+            <h3>{{info['isbn']}}</h3>
+        {% endfor %}
     </div>
-    
 
-    
-
-    <table class="pure-table pure-table-bordered">
-        <thead>
-            <tr>
-                <th>ISBN</th>
-                <th>TITLE</th>
-                <th>AUTHOR</th>
-                <th>YEAR</th>
-                    
-            </tr>
-        </thead>
-        <tbody>
-            {% for book in books %}
-                <tr>
-                    <td><a href="/book/{{book['isbn']}}">{{book['isbn']}}</a></td>
-                    <td>{{book['title']}}</td>
-                    <td>{{book['author']}}</td>
-                    <td>{{book['year']}}</td>
-                
-                    
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-       
-    
-    
+    <div id="gdr">
+        <h4>Goodreads ratings</h4>
+        <ul>
+        <li>Average rating: {{avg_rating_Goodreads}}</li>
+        <li>{{number_rating_Goodreads}} User reviews</li>
+        </ul>
+    </div>
 
 {% endblock %}
