@@ -7,3 +7,4 @@ Werkzeug==0.16.0
 Flask-WTF
 Flask-Login
 requests
+gunicorn
