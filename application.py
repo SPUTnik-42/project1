@@ -79,6 +79,7 @@ class SignupForm(FlaskForm):
     password = PasswordField('password', validators=[InputRequired(), Length(min=5, max=80)])
 
 
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -152,17 +153,18 @@ def search():
     
     # Books not founded
     if rows.rowcount == 0:
-        return render_template("error.html", message="we can't find books with that description.")
+        flash("we can't find books with that description.", "danger")
     
     # Fetch all the results
     books = rows.fetchall()
 
     return render_template("results.html", books=books)
 
-@app.route("/book/<isbn>")
+@app.route("/book/<isbn>", methods=['POST', 'GET'])
 @login_required
 def book(isbn):
     #key: ya8uM2HkMVhG6V4t7bXjA
+    
     row = Dbase.execute("SELECT isbn, title, author, year FROM books WHERE \
                 isbn = :isbn",
                 {"isbn": isbn})
@@ -172,9 +174,53 @@ def book(isbn):
     res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_API_KEY, "isbns": isbn})
     avg_rating_Goodreads = res.json()['books'][0]['average_rating']
     number_rating_Goodreads = res.json()['books'][0]['work_ratings_count']
+    reviews = Dbase.execute("SELECT comment,rating,user_id FROM reviews WHERE isbn = :isbn", {"isbn": isbn})
+
+    if request.method == "POST":
+
+        # Save current user info
+        currentUser = current_user.username
+        
+        # Fetch form data
+        rating = request.form.get("rating")
+        comment = request.form.get("comment")
+        
+        
+       
+
+        # Check for user submission (ONLY 1 review/user allowed per book)
+        row2 = Dbase.execute("SELECT * FROM reviews WHERE user_id = :user_id AND isbn = :isbn",
+                    {"user_id": currentUser,
+                     "isbn": isbn})
+
+        # A review already exists
+        if row2.rowcount == 1:
+            
+            flash('You already submitted a review for this book', 'warning')
+            return redirect("/book/" + isbn)
+         # Convert to save into DB
+        rating = int(rating)
+
+        Dbase.execute("INSERT INTO reviews (user_id, isbn, comment, rating) VALUES \
+                    (:user_id, :isbn, :comment, :rating)",
+                    {"user_id": currentUser, 
+                    "isbn": isbn, 
+                    "comment": comment, 
+                    "rating": rating})
+
+        # Commit transactions to DB and close the connection
+        Dbase.commit()
+
+        flash('Review submitted!', 'info')
+
+        return redirect("/book/" + isbn)
+
     
+
     
-    return render_template("book.html", name=current_user.username,bookInfo = bookInfo, avg_rating_Goodreads = avg_rating_Goodreads,number_rating_Goodreads = number_rating_Goodreads)
+    return render_template("book.html", name=current_user.username,bookInfo = bookInfo, avg_rating_Goodreads = avg_rating_Goodreads,number_rating_Goodreads = number_rating_Goodreads,reviews = reviews)
+
+
 
 if __name__=="__main__":
     app.run(debug=True)
