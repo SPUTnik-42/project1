@@ -1,4 +1,4 @@
-import os, requests
+import os, requests, json
 from flask import Flask, session, render_template, redirect, url_for, flash, request
 from flask_session import Session
 from flask_bootstrap import Bootstrap
@@ -220,7 +220,31 @@ def book(isbn):
     
     return render_template("book.html", name=current_user.username,bookInfo = bookInfo, avg_rating_Goodreads = avg_rating_Goodreads,number_rating_Goodreads = number_rating_Goodreads,reviews = reviews)
 
+@app.route("/api/<isbn>")
+@login_required
+def api(isbn):
+    result = Dbase.execute("SELECT title, author, year FROM books WHERE isbn = :isbn",
+    {"isbn": isbn})
 
+    # Store result of SELECT-query in a dict
+    book_data = dict(result.first())
+    book_data['isbn'] = isbn
+
+    # Query Goodreads API for data on book ratings
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_API_KEY, "isbns": isbn})
+    avg_rating_Goodreads = res.json()['books'][0]['average_rating']
+    number_rating_Goodreads = res.json()['books'][0]['work_ratings_count']
+
+    # Store data from Goodreads in book_data
+    book_data['average_score'] = avg_rating_Goodreads
+    book_data['review_count'] = number_rating_Goodreads
+
+    
+
+    # Convert book_data dict into JSON string
+    book_json = json.dumps(book_data)
+
+    return book_json
 
 if __name__=="__main__":
     app.run(debug=True)
