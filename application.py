@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 #database_url
-DATABASE_URL = "postgres://mpbwycyylmpxxx:ac28ae434f8eb7b635529c2f3dd41042b1bbdcec8c820334f56271e97024eb47@ec2-52-71-55-81.compute-1.amazonaws.com:5432/d1n2s5r3apv588"
+#DATABASE_URL = "postgres://mpbwycyylmpxxx:ac28ae434f8eb7b635529c2f3dd41042b1bbdcec8c820334f56271e97024eb47@ec2-52-71-55-81.compute-1.amazonaws.com:5432/d1n2s5r3apv588"
 
 #api_key 
 GOODREADS_API_KEY = "ya8uM2HkMVhG6V4t7bXjA"
